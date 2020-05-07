@@ -1,0 +1,10 @@
+﻿{
+  "profiles": {
+    "TwitterStream.Producer": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
