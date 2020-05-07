@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Confluent.Kafka;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -40,17 +41,36 @@ namespace TwitterStream.Producer
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 _logger.LogInformation("I'm listening to twitter");
 
-                stream.MatchingTweetReceived += (sender, arguments) =>
+                stream.MatchingTweetReceived += async (sender, arguments) =>
                 {
                     _logger.LogInformation($"Tweet: {arguments.Tweet.Text}");
+                    await SendTweetsByKafka($"Tweet: {arguments.Tweet.Text}");
                 };
 
                 stream.StartStreamMatchingAllConditions();
 
-                await Task.Delay(15000, stoppingToken);
+                await Task.Delay(75000, stoppingToken);
             }
         }
 
+        private async Task SendTweetsByKafka (string text)
+        {
+            ProducerConfig config = new ProducerConfig() { BootstrapServers = "localhost:9092" };
+
+            using (var producer = new ProducerBuilder<Null, string>(config).Build())
+            {
+                try
+                {
+                    var result = await producer.ProduceAsync("twittertopic", new Message<Null, string>() { Value = text });
+                    _logger.LogInformation("Tweet sent at: {time}", DateTimeOffset.Now);
+                }
+                catch (ProduceException<Null, string> e)
+                {
+
+                    _logger.LogError($"{e.Error.Code}: Tweet failed: {e.Error.Reason}");
+                }
+            }
+        }
 
 
     }
