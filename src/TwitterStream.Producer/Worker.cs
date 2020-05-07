@@ -25,13 +25,15 @@ namespace TwitterStream.Producer
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            Console.WriteLine("What topic would you like to get tweets about?");
+            string subject = Console.ReadLine();
             while (!stoppingToken.IsCancellationRequested)
             {
                 ITwitterCredentials demo = Auth.SetUserCredentials(_options.ConsumerKey, _options.ConsumerSecret, _options.AccessToken, _options.AccessTokenSecret);
 
                 IFilteredStream stream = Stream.CreateFilteredStream();
 
-                stream.AddTrack("covid");
+                stream.AddTrack(subject);
 
                 stream.AddTweetLanguageFilter(LanguageFilter.Portuguese);
 
