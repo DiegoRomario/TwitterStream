@@ -15,9 +15,6 @@ namespace TwitterStream.Producer
     {
         private readonly ILogger<Worker> _logger;
         private readonly TwitterAPIAccess _options;
-
-
-
         public Worker(ILogger<Worker> logger, IOptions<TwitterAPIAccess> options)
         {
             _logger = logger;
@@ -43,13 +40,12 @@ namespace TwitterStream.Producer
 
                 stream.MatchingTweetReceived += async (sender, arguments) =>
                 {
-                    _logger.LogInformation($"Tweet: {arguments.Tweet.Text}");
-                    await SendTweetsByKafka($"Tweet: {arguments.Tweet.Text}");
+                    await SendTweetsByKafka($"{arguments.Tweet.Text}");
                 };
 
                 stream.StartStreamMatchingAllConditions();
 
-                await Task.Delay(75000, stoppingToken);
+                await Task.Delay(5000, stoppingToken);
             }
         }
 
