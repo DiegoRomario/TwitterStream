@@ -40,7 +40,7 @@ namespace TwitterStream.Producer
 
                 stream.MatchingTweetReceived += async (sender, arguments) =>
                 {
-                    await SendTweetsByKafka($"{arguments.Tweet.Text}");
+                    await SendTweetsByKafka(new Tweet(arguments.Tweet.CreatedBy.ScreenName, arguments.Tweet.CreatedAt, arguments.Tweet.Text));
                 };
 
                 stream.StartStreamMatchingAllConditions();
@@ -49,7 +49,7 @@ namespace TwitterStream.Producer
             }
         }
 
-        private async Task SendTweetsByKafka (string text)
+        private async Task SendTweetsByKafka (Tweet tweet)
         {
             ProducerConfig config = new ProducerConfig() { BootstrapServers = "localhost:9092" };
 
@@ -57,7 +57,8 @@ namespace TwitterStream.Producer
             {
                 try
                 {
-                    var result = await producer.ProduceAsync("twittertopic", new Message<Null, string>() { Value = text });
+                    string al = JsonSerializer.ToJson<Tweet>(tweet);
+                    var result = await producer.ProduceAsync("twittertopic", new Message<Null, string>() { Value = al });
                     _logger.LogInformation("Tweet sent at: {time}", DateTimeOffset.Now);
                 }
                 catch (ProduceException<Null, string> e)

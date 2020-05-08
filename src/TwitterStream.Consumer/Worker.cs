@@ -37,7 +37,8 @@ namespace TwitterStream.Consumer
                         while (true)
                         {
                             ConsumeResult<Ignore, string> message = consumer.Consume(stoppingToken);
-                            _logger.LogInformation($"Tweet received at {DateTimeOffset.Now}:\n {message.Message.Value}");
+                            _logger.LogInformation($"Tweet received at {DateTimeOffset.Now}:\n\n\n {message.Message.Value}");
+                            await Task.Delay(3000, stoppingToken);
                         }
                     }
                     catch (OperationCanceledException)
