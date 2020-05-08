@@ -1,9 +1,11 @@
 using System;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Confluent.Kafka;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using TwitterStream.Producer;
 
 namespace TwitterStream.Consumer
 {
@@ -37,14 +39,19 @@ namespace TwitterStream.Consumer
                         while (true)
                         {
                             ConsumeResult<Ignore, string> message = consumer.Consume(stoppingToken);
-                            _logger.LogInformation($"Tweet received at {DateTimeOffset.Now}:\n\n\n {message.Message.Value}");
-                            await Task.Delay(3000, stoppingToken);
+                            Tweet tweet = JsonSerializer.Deserialize<Tweet>(message.Message.Value);
+                            _logger.LogInformation($"Tweet received at {DateTimeOffset.Now}:\n\nText: {tweet.Text}\nTweeted by: {tweet.TweetedBy} \nTweeted at: {tweet.TweetedAt} {new String('-',40)}");
+                            await Task.Delay(10, stoppingToken);
                         }
                     }
+
                     catch (OperationCanceledException)
                     {
-
                         consumer.Close();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogInformation(ex.Message);
                     }
                 }
 

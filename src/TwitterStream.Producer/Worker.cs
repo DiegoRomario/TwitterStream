@@ -40,7 +40,7 @@ namespace TwitterStream.Producer
 
                 stream.MatchingTweetReceived += async (sender, arguments) =>
                 {
-                    await SendTweetsByKafka(new Tweet(arguments.Tweet.CreatedBy.ScreenName, arguments.Tweet.CreatedAt, arguments.Tweet.Text));
+                    await SendTweetsByKafka(new Tweet() { TweetedBy = arguments.Tweet.CreatedBy.ScreenName, TweetedAt = arguments.Tweet.CreatedAt, Text = arguments.Tweet.Text });
                 };
 
                 stream.StartStreamMatchingAllConditions();
